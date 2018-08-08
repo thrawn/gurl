@@ -1,0 +1,96 @@
+version: '2.2'
+services:
+
+  app:
+    build:
+      context: ./
+      dockerfile: app.dockerfile
+    working_dir: /var/www
+    volumes:
+      - ./app:/var/www
+    environment:
+      - "DB_PORT=3306"
+      - "DB_HOST=mysql"
+
+  web:
+    build:
+      context: ./
+      dockerfile: nginx.dockerfile
+    working_dir: /var/www
+    volumes_from:
+      - app
+    ports:
+      - 8080:80
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - dbdata:/var/lib/mysql
+    environment:
+      - "MYSQL_DATABASE=data"
+      - "MYSQL_USER=data"
+      - "MYSQL_PASSWORD=data"
+      - "MYSQL_ROOT_PASSWORD=data"
+    ports:
+        - "33061:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - "MYSQL_USERNAME=root"
+      - "MYSQL_ROOT_PASSWORD=data"
+      - "PMA_HOST=mysql"
+    links:
+      - mysql
+    ports:
+      - "8081:80"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.3
+    container_name: elasticsearch
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - esnet
+  elasticsearch2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.3
+    container_name: elasticsearch2
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata2:/usr/share/elasticsearch/data
+    networks:
+      - esnet
+
+
+volumes:
+  esdata1:
+    driver: local
+  esdata2:
+    driver: local
+  dbdata:
+
+networks:
+  esnet:
