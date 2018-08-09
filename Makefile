@@ -1,7 +1,7 @@
 
+SHELL := /bin/bash
 
-
-LARAVEL_VERSION := 5.4.30
+LARAVEL_VERSION := 5.6.12
 LARAVEL_DIRECTORY := ./app
 
 DOCKER_VERSION := $(shell docker -v)
@@ -23,6 +23,13 @@ STAMP := `date +%Y-%m-%d-%H-%M`
 
 all:
 	@echo ''
+	@echo ''
+	@echo '               G U R L'
+	@echo ''
+	@echo '        - fast n fresh laravel - '
+	@echo '  local on Docker, remote on California-K '
+	@echo ''
+	@echo ''
 	@echo "COMMIT: $(COMMIT)"
 	@echo "LARAVEL: $(LARAVEL_VERSION)"
 	@echo "LARAVEL DIRECTORY: $(LARAVEL_DIRECTORY)"
@@ -39,41 +46,63 @@ all:
 	@echo ''
 	@echo "STAMP: $(STAMP)"
 	@echo ''
+	@echo 'commands'
+	@echo ''
+	@echo 'make up'
+	@echo 'make down'
+	@echo 'make new-laravel-install'
+	@echo 'make composer-update'
+	@echo 'make composer-install'
+	@echo ''
 
+.PHONY:up
 up:
 	@echo ''
 	@docker-compose up -d
 	@echo ''
 	@echo 'site up?'
-	@sleep 3
-	@curl -sSfI http://localhost:8080 | head -n 1
+	@sleep 10
+	@curl -sSfI http://localhost:8080 2>/dev/null | head -n 1
 	@echo ''
 
+.PHONY:down
 down:
 	@echo ''
 	@docker-compose down
 	@echo ''
 
+.PHONY:restart
+restart:
+	@echo ''
+	@docker-compose restart
+	@echo ''
+
+.PHONY:new-laravel-install
 new-laravel-install: backup-laravel
+	$(MAKE) down
 	@echo ''
 	@echo "installing laravel $(LARAVEL_VERSION) to ./app"
 	@echo ''
 	@echo "downloading laravel $(LARAVEL_VERSION)"
+	@echo ''
 	@curl -s -L https://github.com/laravel/laravel/archive/v$(LARAVEL_VERSION).tar.gz | tar xz
 	@echo "moving $(LARAVEL_VERSION) to ./app"
 	@mv ./laravel-$(LARAVEL_VERSION) ./app
+	@echo ''
 	@echo "setting permissions to 777 on ./app/storage and ./app/bootstrap/cache"
 	@chmod -R 777 ./app/storage && chmod -R 777 ./app/bootstrap/cache
+	@echo ''
 	@echo "composer install"
 	$(MAKE) composer-install
-	@echo "create ./app/.env file"
-	@mv ./app/.env.example ./app/.env
-	@echo "docker-compose up -d"
-	@docker-compose up -d
-	@echo "create laravel application key"
-	@docker-compose exec app php artisan key:generate
-	@echo "optimize laravel"
-	@docker-compose exec app php artisan optimize
+	@echo ''
+	$(MAKE) app-gitignore
+	$(MAKE) app-env
+	@echo ''
+	$(MAKE) up
+	@sleep 30
+	@echo ''
+	@#echo "create laravel application key"
+	@#docker-compose exec app php artisan key:generate
 	@echo ''
 	@docker-compose exec web nginx -v
 	@docker-compose exec app php -v
@@ -81,16 +110,25 @@ new-laravel-install: backup-laravel
 	@echo 'complete'
 	@echo ''
 
-	
-
+.PHONY:backup-laravel
 backup-laravel:
 	@if [ -d "$(LARAVEL_DIRECTORY)" ]; then \
 			echo "directory exists, backing up"; \
 			mv "$(LARAVEL_DIRECTORY)" "$(LARAVEL_DIRECTORY)-$(STAMP)"; \
 	fi
 
-composer-update:
-	docker run --rm -v $(PWD)/app:/app composer/composer update
+.PHONY:app-gitignore
+app-gitignore:
+	cp -f config/dotfiles/app_gitignore app/.gitignore
 
+.PHONY:app-env
+app-env:
+	cp -f config/dotfiles/app_env app/.env
+
+.PHONY:composer-update
+composer-update:
+	time docker run --rm -v $(PWD)/app:/app composer update
+
+.PHONY:composer-install
 composer-install:
-	docker run --rm -v $(PWD)/app:/app composer/composer install
+	time docker run --rm -v $(PWD)/app:/app composer -q install

@@ -42,7 +42,7 @@ services:
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     environment:
-      - "MYSQL_USERNAME=root"
+      - "MYSQL_USERNAME=data"
       - "MYSQL_ROOT_PASSWORD=data"
       - "PMA_HOST=mysql"
     links:
@@ -51,7 +51,7 @@ services:
       - "8081:80"
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.3
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.3.2
     container_name: elasticsearch
     environment:
       - cluster.name=docker-cluster
@@ -68,7 +68,7 @@ services:
     networks:
       - esnet
   elasticsearch2:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.3
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.3.2
     container_name: elasticsearch2
     environment:
       - cluster.name=docker-cluster
