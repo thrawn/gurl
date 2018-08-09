@@ -9,13 +9,13 @@ DOCKER_COMPOSE_VERSION := $(shell docker-compose -v)
 
 COMMIT=$(shell git rev-parse HEAD)
 
-NGINX := $(shell docker-compose exec web nginx -v 2>/dev/null )
-PHP   := $(shell docker-compose exec app php -v 2>/dev/null )
+NGINX := $(shell docker-compose exec nginx nginx -v 2>/dev/null )
+PHP   := $(shell docker-compose exec php php -v 2>/dev/null )
 MYSQL := $(shell docker-compose exec mysql mysql --version 2>/dev/null )
 REDIS := $(shell docker-compose exec redis redis-server -v 2>/dev/null )
 ES := $(shell curl http://127.0.0.1:9200/_cat/health 2>/dev/null )
 
-SITE_UP = $(shell curl -sSfI http://localhost:8080 2>/dev/null | head -n 1)
+SITE_UP = $(shell curl -sSfI -m 2 http://localhost:8080 2>/dev/null | head -n 1)
 
 STAMP := `date +%Y-%m-%d-%H-%M`
 
@@ -53,7 +53,27 @@ all:
 	@echo 'make new-laravel-install'
 	@echo 'make composer-update'
 	@echo 'make composer-install'
+	@echo 'make docker'
+	@echo 'make docker-prune'
 	@echo ''
+	@echo ''
+
+.PHONY:d
+d:
+	docker ps -a
+
+.PHONY:ps
+ps:
+	docker-compose ps
+
+.PHONY:prune
+prune:
+	docker container prune
+	docker image prune
+
+.PHONY:rebuild
+rebuild:
+	docker-compose build --no-cache
 
 .PHONY:up
 up:
@@ -104,8 +124,8 @@ new-laravel-install: backup-laravel
 	@#echo "create laravel application key"
 	@#docker-compose exec app php artisan key:generate
 	@echo ''
-	@docker-compose exec web nginx -v
-	@docker-compose exec app php -v
+	@docker-compose exec nginx nginx -v
+	@docker-compose exec php php -v
 	@echo ''
 	@echo 'complete'
 	@echo ''

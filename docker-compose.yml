@@ -1,10 +1,10 @@
 version: '2.2'
 services:
 
-  app:
+  php:
     build:
-      context: ./
-      dockerfile: app.dockerfile
+      context: ./config/php
+      dockerfile: php.dockerfile
     working_dir: /var/www
     volumes:
       - ./app:/var/www
@@ -12,13 +12,13 @@ services:
       - "DB_PORT=3306"
       - "DB_HOST=mysql"
 
-  web:
+  nginx:
     build:
-      context: ./
+      context: ./config/nginx
       dockerfile: nginx.dockerfile
     working_dir: /var/www
     volumes_from:
-      - app
+      - php
     ports:
       - 8080:80
 
