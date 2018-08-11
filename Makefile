@@ -19,6 +19,10 @@ SITE_UP = $(shell curl -sSfI -m 2 http://localhost:8080 2>/dev/null | head -n 1)
 
 STAMP := `date +%Y-%m-%d-%H-%M`
 
+# california-k
+#
+KUBECTL_VERSION := 1.10.3
+
 
 
 all:
@@ -152,3 +156,37 @@ composer-update:
 .PHONY:composer-install
 composer-install:
 	time docker run --rm -v $(PWD)/app:/app composer -q install
+
+# california-k
+#
+.PHONY:get-kubectl
+get-kubectl:
+	@echo ''
+	@echo "fetching version $(KUBECTL_VERSION) kubectl"
+	@[ ./california-k/kubectl ] && rm -f ./california-k/kubectl 2>/dev/null
+	@[ ./california-k/kubectl.sha256 ] && rm -f ./california-k/kubectl.sha256 2>/dev/null
+	@curl -s -o ./california-k/kubectl https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3/2018-07-26/bin/darwin/amd64/kubectl
+	@chmod +x ./california-k/kubectl
+	@echo 'sha-256 check'
+	@curl -s -o ./california-k/kubectl.sha256 https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3/2018-07-26/bin/darwin/amd64/kubectl.sha256
+	@openssl sha -sha256 ./california-k/kubectl
+	@echo 'kubectl.sha256 file'
+	@cat ./california-k/kubectl.sha256
+	@echo 'complete'
+	@echo ''
+
+.PHONY:get-aws-iam-authenticator
+get-aws-iam-authenticator:
+	@echo ''
+	@echo "fetching aws-iam-authenticator"
+	@[ ./california-k/aws-iam-authenticator ] && rm -f ./california-k/aws-iam-authenticator 2>/dev/null
+	@[ ./california-k/aws-iam-authenticator.sha256 ] && rm -f ./california-k/aws-iam-authenticator.sha256 2>/dev/null
+	@curl -s -o ./california-k/aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3/2018-07-26/bin/darwin/amd64/aws-iam-authenticator
+	@chmod +x ./california-k/aws-iam-authenticator
+	@echo 'sha-256 check'
+	@curl -s -o ./california-k/aws-iam-authenticator.sha256 https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3/2018-07-26/bin/darwin/amd64/aws-iam-authenticator.sha256
+	@openssl sha -sha256 ./california-k/aws-iam-authenticator
+	@echo 'aws-iam-authenticator.sha256 file'
+	@cat ./california-k/aws-iam-authenticator.sha256
+	@echo 'complete'
+	@echo ''
