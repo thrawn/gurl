@@ -5,7 +5,7 @@
                G U R L
 
         - fast n fresh laravel -
-  local on Docker, remote on California-K
+  local on Docker, remote on California
 
 
 COMMIT: f00d251d09e9d19fcc3ceb908a5b069d7c7f6de5
