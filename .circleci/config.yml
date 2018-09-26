@@ -17,7 +17,7 @@ jobs:
       # - image: circleci/mysql:5.7-ram
       # 
       # - image: redis:2.8.19
-    working_directory: ~/gurl/app
+    working_directory: ~/gurl
     steps:
       - checkout:
           path: ~/gurl
