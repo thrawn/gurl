@@ -101,3 +101,5 @@ Zend OPcache 7.2.10
 zip 1.15.3
 zlib 7.2.10
 ```
+
+fetch ./app from gurl-app
