@@ -17,7 +17,7 @@ jobs:
       # - image: circleci/mysql:5.7-ram
       # 
       # - image: redis:2.8.19
-    working_directory: ~/gurl/app
+    working_directory: ~/gurl
     steps:
       - checkout:
           path: ~/gurl
@@ -42,7 +42,7 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           #- v1-dependencies-
 
-      - run: composer install -n --prefer-dist
+      - run: cd app; composer install -n --prefer-dist
 
       - save_cache:
           key: composer-v1-{{ checksum "composer.lock" }}
