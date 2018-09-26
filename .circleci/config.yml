@@ -25,6 +25,8 @@ jobs:
           name: "get application"
           command: |
             git clone https://github.com/thrawn/gurl-app.git app
+            cd app
+            ls -la
 
       - run: sudo apt update && sudo apt install zlib1g-dev libsqlite3-dev
       - run: sudo docker-php-ext-install zip
