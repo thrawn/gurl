@@ -17,15 +17,15 @@ jobs:
       # - image: circleci/mysql:5.7-ram
       # 
       # - image: redis:2.8.19
-    working_directory: ~/gurl
+    working_directory: ~/gurl/gurl-app
     steps:
       - checkout:
           path: ~/gurl
       - run:
           name: "get application"
           command: |
-            git clone https://github.com/thrawn/gurl-app.git app
-            cd app
+            git clone https://github.com/thrawn/gurl-app.git
+            cd gurl-app
             pwd
             ls -la
 
@@ -42,7 +42,7 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           #- v1-dependencies-
 
-      - run: cd app; composer install -n --prefer-dist
+      - run: pwd; composer install -n --prefer-dist
 
       - save_cache:
           key: composer-v1-{{ checksum "composer.lock" }}
@@ -55,7 +55,7 @@ jobs:
           keys:
             - node-v3-{{ checksum "package.json" }}
             - node-v3-
-      - run: yarn install
+      - run: pwd; yarn install
       - save_cache:
           key: node-v3-{{ checksum "package.json" }}
           paths:
