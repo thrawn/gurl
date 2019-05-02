@@ -1,0 +1,41 @@
+  php-nimbus:
+    build:
+      context: ./config/php
+      dockerfile: php.dockerfile
+    working_dir: /var/www
+    volumes:
+      - ./services/nimbus/src:/var/www
+    environment:
+      - "DB_PORT=3306"
+      - "DB_HOST=mysql"
+
+  nginx-nimbus:
+    build:
+      context: ./config/nginx
+      dockerfile: nginx.dockerfile
+    working_dir: /var/www
+    volumes_from:
+      - php-nimbus
+    ports:
+      - 8081:80
+
+  php-atlas:
+    build:
+      context: ./config/php
+      dockerfile: php.dockerfile
+    working_dir: /var/www
+    volumes:
+      - ./services/atlas/src:/var/www
+    environment:
+      - "DB_PORT=3306"
+      - "DB_HOST=mysql"
+
+  nginx-atlas:
+    build:
+      context: ./config/nginx
+      dockerfile: nginx.dockerfile
+    working_dir: /var/www
+    volumes_from:
+      - php-atlas
+    ports:
+      - 8082:80

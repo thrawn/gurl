@@ -1,0 +1,25 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: data
+      MYSQL_ROOT_PASSWORD: data
+    ports:
+      - "3306:3306"
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: data
+      POSTGRES_USER: data
+      POSTGRES_DB: data
+    ports:
+      - "5432:5432"
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8090:8080"

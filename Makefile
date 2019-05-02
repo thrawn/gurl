@@ -18,54 +18,57 @@ ENV=dev
 REGION=us-west-2
 AWS_PROFILE=default
 
-
-LARAVEL_VERSION := 5.6.12
-LARAVEL_DIRECTORY := ./app
-
-#DOCKER_VERSION := $(shell docker -v)
-#DOCKER_COMPOSE_VERSION := $(shell docker-compose -v)
+# laravel version to download
+LARAVEL_VERSION := 5.8.0
+LARAVEL_DIRECTORY := $(PWD)/services/app
 
 COMMIT=$(shell git rev-parse HEAD)
+STAMP := `date +%Y-%m-%d-%H-%M-%S`
 
-#NGINX := $(shell docker-compose exec nginx nginx -v 2>/dev/null )
-#PHP   := $(shell docker-compose exec php php -v 2>/dev/null )
-#MYSQL := $(shell docker-compose exec mysql mysql --version 2>/dev/null )
-#REDIS := $(shell docker-compose exec redis redis-server -v 2>/dev/null )
-#ES := $(shell curl --connect-timeout 4 http://127.0.0.1:9200/_cat/health 2>/dev/null )
-
-#SITE_UP = $(shell curl --max-time 4 -sSfI -m 2 http://localhost:8080 2>/dev/null | head -n 1)
-
-STAMP := `date +%Y-%m-%d-%H-%M`
+SERVICE_REPOS := gurl-app hurl mike
 
 # california
 #
-KUBECTL_VERSION := 1.10.3
-
-
+KUBECTL_VERSION := 1.11.4
 
 all:
 	@echo ''
 	@echo ''
+	@echo -e "$(BOLD)$(YELLOW)"
 	@echo '               G U R L'
 	@echo ''
-	@echo '        - fast n fresh laravel - '
+	@echo '     - fast n fresh laravel apps - '
+	@echo ''
 	@echo '  local on Docker, remote on California '
 	@echo ''
+	@echo -e "$(RESET)"
+	@echo -e "$(RED)"
+	@echo "NOTE: add your github ssh key to ssh-agent"
+	@echo 'for services git operations'
 	@echo ''
+	@echo 'NOTE: docker and docker-compose are required'
+	@echo -e "$(RESET)"
+	@echo -e "$(YELLOW)"
+	@echo ''
+	@echo 'to start environment:'
+	@echo 'make up'
+	@echo ''
+	@echo 'to stop environment'
+	@echo 'make down'
+	@echo ''
+	@echo -e "$(RESET)"
+	@echo ''
+	@echo -e "$(CYAN)"
+	@echo ''
+	@$(MAKE) show-services
+	@echo ''
+	@echo -e "$(RESET)"
 	@echo 'commands'
 	@echo ''
-	@echo 'make up'
-	@echo 'make down'
-	@echo 'make new-laravel-install'
-	@echo 'make composer-update'
-	@echo 'make composer-install'
-	@echo 'make docker'
-	@echo 'make docker-prune'
-	@echo ''
-	@make -rpn | sed -n -e '/^$$/ { n ; /^[^ .#][^ ]*:/ { s/:.*$$// ; p ; } ; }' | sort -u
+	@#make -rpn | sed -n -e '/^$$/ { n ; /^[^ .#][^ ]*:/ { s/:.*$$// ; p ; } ; }' | sort -u
 	@echo ''
 	@echo ''
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 	@echo ''
 
 .PHONY:info
@@ -78,6 +81,53 @@ info:
 	@echo ''
 	@./bin/info.sh
 	@echo ''
+
+show-services:
+	@echo ''
+	@echo 'services (git repos) to install:'
+	@for s in $(SERVICE_REPOS); do \
+		echo $$s; \
+	done
+	@echo ''
+
+
+.PHONY:service-dir-check
+service-dir-check: ./services
+	@echo ''
+	@echo 'services directory present'
+	@echo ''
+
+.PHONY:services-backup
+services-backup: service-dir-check
+	@echo ''
+	@echo "backing up ./services to /tmp/services/$(STAMP) directory"
+	@mkdir -p /tmp/services/$(STAMP)
+	@cp -a ./services/* /tmp/services/$(STAMP)/
+	@echo ''
+
+.PHONY:services-directory
+services-directory:
+	@echo ''
+	@test -d ./services && echo 'services directory present' || mkdir -p ./services
+	@echo ''
+
+.PHONY:installed
+installed: services-directory
+	@echo ''
+	@for s in $(SERVICE_REPOS); do \
+		test -d ./services/$$s/src && echo "$$s present" || $(MAKE) service-install_$$s; \
+	done
+	@echo ''
+
+service-install_%:
+	@echo $@
+
+.PHONY:check
+check:
+	@echo ''
+	@echo 'luke skywalker'
+	@echo ''
+
 
 .PHONY:d
 d:
