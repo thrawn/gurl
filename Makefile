@@ -19,7 +19,7 @@ REGION=us-west-2
 AWS_PROFILE=default
 
 # laravel version to download
-LARAVEL_VERSION := 5.8.0
+LARAVEL_VERSION := 5.8.10
 LARAVEL_DIRECTORY := $(PWD)/services/app
 
 COMMIT=$(shell git rev-parse HEAD)
